@@ -1,0 +1,19 @@
+{
+    "name": "tv2regionerne/statamic-endless",
+    "autoload": {
+        "psr-4": {
+            "Tv2regionerne\\StatamicEndless\\": "src"
+        }
+    },
+    "extra": {
+        "statamic": {
+            "name": "Statamic Endless",
+            "description": "Statamic Endless addon"
+        },
+        "laravel": {
+            "providers": [
+                "Tv2regionerne\\StatamicEndless\\ServiceProvider"
+            ]
+        }
+    }
+}

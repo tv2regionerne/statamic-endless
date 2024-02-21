@@ -15,5 +15,14 @@
                 "Tv2regionerne\\StatamicEndless\\ServiceProvider"
             ]
         }
+    },
+    "require": {
+        "statamic/cms": "^4.48",
+        "livewire/livewire": "^3.4"
+    },
+    "config": {
+        "allow-plugins": {
+            "pixelfear/composer-dist-plugin": true
+        }
     }
 }

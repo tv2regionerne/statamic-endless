@@ -22,12 +22,12 @@ class Endless extends Component
 
     public function mount()
     {
-        $this->config = Cache::get('statamic-endless-'.$this->hash);
+        $this->config = Cache::get('statamic-endless.'.$this->hash);
     }
 
     public function hydrate()
     {
-        $this->config = Cache::get('statamic-endless-'.$this->hash);
+        $this->config = Cache::get('statamic-endless.'.$this->hash);
     }
 
     #[Renderless]

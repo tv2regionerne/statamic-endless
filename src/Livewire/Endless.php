@@ -77,6 +77,7 @@ class Endless extends Component
 
         return [
             ...$this->config['params'],
+            ...$this->config['provide'],
             ...$tag->index(),
         ];
     }

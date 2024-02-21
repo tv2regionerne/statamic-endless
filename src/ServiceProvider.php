@@ -50,9 +50,16 @@ class ServiceProvider extends AddonServiceProvider
                             && $node->name->name == $as;
                     });
 
+                $provide = collect(explode('|', $this->params->get('provide')))
+                    ->filter()
+                    ->mapWithKeys(function ($key) {
+                        return [$key => $this->context->get($key)];
+                    });
+
                 return [
                     'tag' => 'collection',
                     'params' => $this->params->toArray(),
+                    'provide' => $provide->toArray(),
                     'main' => $this->content,
                     'loop' => $loop?->documentText(),
                 ];

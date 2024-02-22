@@ -44,9 +44,12 @@ class Endless extends Component
     {
         return <<<'HTML'
         <div x-data="{
+            loading: false,
             trigger() {
+                this.loading = true;
                 this.$wire.trigger()
                     .then(({ html }) => {
+                        this.loading = false;
                         this.$refs.append?.insertAdjacentHTML('beforeend', html);
                         this.$refs.prepend?.insertAdjacentHTML('afterbegin', html);
                     });

@@ -27,10 +27,8 @@ Make sure Livewire v3 is installed, then use the `collection:endless` tag:
 
 You must enable pagination.
 
-The content will be wrapped in a Livewire/Alpine component that you can interact with via Alpine properties.
+The content will be wrapped in a Livewire/Alpine component:
 
-The element containing your entries should have an `x-ref` of either `append` or `prepend` depending on where you want new entries added.
-
-You can call `trigger` to load more entries using `x-intersect` or `x-on`.
-
-You can check the loading state with `loading`.
+* You should add an `x-ref` of either `append` or `prepend` to the element that contains your list.
+* You can call `trigger` to load more entries using `x-intersect` or `x-on`.
+* You can check the loading state with `loading`.

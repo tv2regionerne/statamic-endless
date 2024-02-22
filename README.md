@@ -21,4 +21,4 @@ composer require tv2regionerne/statamic-endless
       </div>
       <button x-on:click="trigger">Load More</button>
 {{ /collection:endless }}
-``
+```

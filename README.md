@@ -1,6 +1,6 @@
 # Statamic Endless
 
-Statamic Endless is a Statamic addon that allows you to create "infinite scroll" elements that automatically load new entries when you get to the end of the list.
+Statamic Endless allows you to create infinite scroll lists that automatically or manually load new entries when you get to the end.
 
 ## How to Install
 
@@ -12,6 +12,8 @@ composer require tv2regionerne/statamic-endless
 
 ## How to Use
 
+Make sure Livewire v3 is installed, then use the `collection:endless` tag:
+
 ```antlers
 {{ collection:endless as="posts" from="blog" paginate="5" }}
       <div x-ref="append">
@@ -22,3 +24,11 @@ composer require tv2regionerne/statamic-endless
       <button x-on:click="trigger">Load More</button>
 {{ /collection:endless }}
 ```
+
+The content will be wrapped in a Livewire/Alpine component that you can interact with via Alpine properties.
+
+The element containing your entries should have an `x-ref` of either `append` or `prepend` depending on where you want new entries added.
+
+You can call `trigger` to load more entries using `x-intersect` or `x-on`.
+
+You can check the loading state with `loading`.

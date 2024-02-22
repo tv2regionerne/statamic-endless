@@ -40,10 +40,8 @@ class ServiceProvider extends AddonServiceProvider
             Cache::rememberForever($key, function () {
                 $as = $this->params->get('as', $this->defaultAsKey);
 
-                $parser = app(DocumentParser::class);
-                $nodes = $parser->parse($this->content);
-
-                $loop = collect($nodes)
+                $parser = tap(app(DocumentParser::class))->parse($this->content);
+                $loop = collect($parser->getNodes())
                     ->first(function ($node) use ($as) {
                         return $node instanceof AntlersNode
                             && $node->name != null

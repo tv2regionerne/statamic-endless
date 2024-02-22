@@ -25,6 +25,8 @@ Make sure Livewire v3 is installed, then use the `collection:endless` tag:
 {{ /collection:endless }}
 ```
 
+You must enable pagination.
+
 The content will be wrapped in a Livewire/Alpine component that you can interact with via Alpine properties.
 
 The element containing your entries should have an `x-ref` of either `append` or `prepend` depending on where you want new entries added.

@@ -1,14 +1,6 @@
 # Statamic Endless
 
-> Statamic Endless is a Statamic addon that does something pretty neat.
-
-## Features
-
-This addon does:
-
-- This
-- And this
-- And even this
+Statamic Endless is a Statamic addon that allows you to create "infinite scroll" elements that automatically load new entries when you get to the end of the list.
 
 ## How to Install
 
@@ -20,4 +12,13 @@ composer require tv2regionerne/statamic-endless
 
 ## How to Use
 
-Here's where you can explain how to use this wonderful addon.
+```antlers
+{{ collection:endless as="posts" from="blog" paginate="5" }}
+      <div x-ref="append">
+          {{ posts }}
+              {{ partial:blog/post }}
+          {{ /posts }}
+      </div>
+      <button x-on:click="trigger">Load More</button>
+{{ /collection:endless }}
+``

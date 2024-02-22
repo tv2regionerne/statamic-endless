@@ -48,6 +48,10 @@ class ServiceProvider extends AddonServiceProvider
                             && $node->name->name == $as;
                     });
 
+                if (! $loop) {
+                    throw new \Exception('No loop template node found');
+                }
+
                 $provide = collect(explode('|', $this->params->get('provide')))
                     ->filter()
                     ->mapWithKeys(function ($key) {
@@ -59,7 +63,7 @@ class ServiceProvider extends AddonServiceProvider
                     'params' => $this->params->toArray(),
                     'provide' => $provide->toArray(),
                     'main' => $this->content,
-                    'loop' => $loop?->documentText(),
+                    'loop' => $loop->documentText(),
                 ];
             });
 

@@ -36,8 +36,8 @@ class ServiceProvider extends AddonServiceProvider
             $hash = md5(serialize([
                 $this->tag,
                 $this->content,
-                $context->toArray(),
                 $params->toArray(),
+                $context->toArray(),
             ]));
 
             $key = 'statamic-endless.'.$hash;

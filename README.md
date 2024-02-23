@@ -33,4 +33,4 @@ The content will be wrapped in a Livewire/Alpine component:
 * You can call `trigger` to load more entries using `x-intersect` or `x-on`.
 * You can check the loading state with `loading`.
 
-On secondary loads variables from outside tag scope will only be avaliable if you list them in the `context` parameter (pipe delimited).
+On secondary loads variables from outside tag scope will only be avaliable if you list them in the `context` parameter (pipe delimited). These variables must be serializable.

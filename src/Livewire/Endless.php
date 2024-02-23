@@ -75,12 +75,11 @@ class Endless extends Component
                 'params' => $this->config['params'],
                 'parser' => null,
                 'content' => null,
-                'context' => null,
+                'context' => $this->config['context'],
             ]);
 
         return [
-            ...$this->config['params'],
-            ...$this->config['provide'],
+            ...$this->config['context'],
             ...$tag->index(),
         ];
     }

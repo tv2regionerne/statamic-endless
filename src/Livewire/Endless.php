@@ -112,10 +112,10 @@ class Endless extends Component
         
         $paginate = $params['paginate'];
         
-        $paginate['has_more_posts'] = $paginate['total_pages'] > $paginate['current_page'];
+        $paginate['has_more_pages'] = $paginate['total_pages'] > $paginate['current_page'];
 
         return collect($paginate)
-            ->only(['has_more_posts', 'total_pages', 'current_page', 'total_items', 'items_per_page'])
+            ->except(['auto_links'])
             ->all();        
     }
 }

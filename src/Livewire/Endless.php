@@ -34,38 +34,58 @@ class Endless extends Component
     public function trigger()
     {
         $this->nextPage();
+        
+        [$html, $params] = $this->renderLoop();
 
         return [
-            'html' => $this->renderLoop(),
+            'html' => $html,
+            'paginate' => $this->getPaginateFromParams($params),
         ];
     }
 
     public function render()
     {
+        [$html, $params] = $this->renderMain();
+        
+        $paginate = $this->getPaginateFromParams($params);
+        
         return <<<'HTML'
-        <div x-data="{
+        @php [$html, $params] = $this->renderMain(); @endphp
+        <div x-data='{
             loading: false,
+            paginate: @json($this->getPaginateFromParams($params)),
             trigger() {
                 this.loading = true;
                 this.$wire.trigger()
-                    .then(({ html }) => {
+                    .then(({ html, paginate }) => {
                         this.loading = false;
-                        this.$refs.append?.insertAdjacentHTML('beforeend', html);
-                        this.$refs.prepend?.insertAdjacentHTML('afterbegin', html);
+                        this.paginate = paginate;
+                        this.$refs.append?.insertAdjacentHTML("beforeend", html);
+                        this.$refs.prepend?.insertAdjacentHTML("afterbegin", html);
                     });
             },
-        }">{!! $this->renderMain() !!}</div>
+        }'>{!! $html !!}</div>
         HTML;
     }
 
     protected function renderMain()
     {
-        return (string) Antlers::parse($this->config['main'], $this->viewParams());
+        $params = $this->viewParams();
+        
+        return [
+            (string) Antlers::parse($this->config['main'], $params),
+            $params,
+        ];
     }
 
     protected function renderLoop()
     {
-        return (string) Antlers::parse($this->config['loop'], $this->viewParams());
+        $params = $this->viewParams();
+
+        return [
+            (string) Antlers::parse($this->config['loop'], $params),
+            $params,
+        ];
     }
 
     protected function viewParams()
@@ -82,5 +102,20 @@ class Endless extends Component
             ...$this->config['context'],
             ...$tag->index(),
         ];
+    }
+    
+    protected function getPaginateFromParams($params)
+    {
+        if (! isset($params['paginate'])) {
+            return false;
+        }
+        
+        $paginate = $params['paginate'];
+        
+        $paginate['has_more_posts'] = $paginate['total_pages'] > $paginate['current_page'];
+
+        return collect($paginate)
+            ->only(['has_more_posts', 'total_pages', 'current_page', 'total_items', 'items_per_page'])
+            ->all();        
     }
 }

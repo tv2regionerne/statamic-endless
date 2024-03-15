@@ -21,7 +21,7 @@ Make sure Livewire v3 is installed, then use the `collection:endless` tag:
             {{ partial:blog/post }}
         {{ /posts }}
     </div>
-    <button x-on:click="trigger">Load More</button>
+    <button x-on:click="trigger" x-show="paginate.has_more_pages">Load More</button>
 {{ /collection:endless }}
 ```
 

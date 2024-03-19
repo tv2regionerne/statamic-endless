@@ -65,7 +65,6 @@ class Endless extends Component
                         if (this.$refs.prepend) {
                             this.$refs.prepend.insertBefore(divFragment, this.$refs.prepend.firstChild);
                         }
-                        try { Alpine.discoverUninitializedComponents(function(el){ Alpine.initializeComponent(el) }); } catch(e) { }
                     });
             },
         }'>{!! $html !!}</div>

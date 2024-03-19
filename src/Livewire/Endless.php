@@ -60,8 +60,11 @@ class Endless extends Component
                     .then(({ html, paginate }) => {
                         this.loading = false;
                         this.paginate = paginate;
-                        this.$refs.append?.insertAdjacentHTML("beforeend", html);
-                        this.$refs.prepend?.insertAdjacentHTML("afterbegin", html);
+                        const divFragment = document.createRange().createContextualFragment(html);
+                        this.$refs.append?.appendChild(divFragment.cloneNode(true));
+                        if (this.$refs.prepend) {
+                            this.$refs.prepend.insertBefore(divFragment, this.$refs.prepend.firstChild);
+                        }
                     });
             },
         }'>{!! $html !!}</div>

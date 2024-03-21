@@ -17,12 +17,15 @@ class Endless extends Component
 
     #[Locked]
     public $hash;
-
+    
+    public $offset = 0;
+    
     protected $config;
 
     public function mount()
     {
         $this->config = Cache::get('statamic-endless.'.$this->hash);
+        $this->offset = 0;
     }
 
     public function hydrate()
@@ -36,6 +39,10 @@ class Endless extends Component
         $this->nextPage();
         
         [$html, $params] = $this->renderLoop();
+        
+        if (isset($params['limit'])) {
+            $this->offset += count($params['entries']);
+        }
 
         return [
             'html' => $html,
@@ -93,6 +100,8 @@ class Endless extends Component
 
     protected function viewParams()
     {
+        $this->config['params']['offset'] = $this->offset;        
+
         $tag = app(Loader::class)
             ->load($this->config['tag'], [
                 'params' => $this->config['params'],
@@ -112,9 +121,9 @@ class Endless extends Component
         if (! isset($params['paginate'])) {
             return false;
         }
-        
+
         $paginate = $params['paginate'];
-        
+    
         $paginate['has_more_pages'] = $paginate['total_pages'] > $paginate['current_page'];
 
         return collect($paginate)

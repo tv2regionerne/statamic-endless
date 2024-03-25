@@ -34,8 +34,8 @@ class Endless extends Component
     public function trigger()
     {
         $this->nextPage();
-        
-        [$html, $params] = $this->renderLoop();
+
+        [$html, $params] = $this->outputLoop();
 
         return [
             'html' => $html,
@@ -45,12 +45,8 @@ class Endless extends Component
 
     public function render()
     {
-        [$html, $params] = $this->renderMain();
-        
-        $paginate = $this->getPaginateFromParams($params);
-        
         return <<<'HTML'
-        @php [$html, $params] = $this->renderMain(); @endphp
+        @php [$html, $params] = $this->outputMain(); @endphp
         <div x-data='{
             loading: false,
             paginate: @json($this->getPaginateFromParams($params)),
@@ -71,17 +67,17 @@ class Endless extends Component
         HTML;
     }
 
-    protected function renderMain()
+    protected function outputMain()
     {
         $params = $this->viewParams();
-        
+
         return [
             (string) Antlers::parse($this->config['main'], $params),
             $params,
         ];
     }
 
-    protected function renderLoop()
+    protected function outputLoop()
     {
         $params = $this->viewParams();
 
@@ -106,19 +102,19 @@ class Endless extends Component
             ...$tag->index(),
         ];
     }
-    
+
     protected function getPaginateFromParams($params)
     {
         if (! isset($params['paginate'])) {
             return false;
         }
-        
+
         $paginate = $params['paginate'];
-        
+
         $paginate['has_more_pages'] = $paginate['total_pages'] > $paginate['current_page'];
 
         return collect($paginate)
             ->except(['auto_links'])
-            ->all();        
+            ->all();
     }
 }

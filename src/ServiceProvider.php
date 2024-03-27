@@ -33,6 +33,10 @@ class ServiceProvider extends AddonServiceProvider
             $context = $this->context
                 ->only(explode('|', $params->get('context')));
 
+            if ($limit = $params->get('limit')) {
+                $params = $params->put('paginate', $limit)->except('limit');
+            }
+
             $hash = md5(serialize([
                 $this->tag,
                 $this->content,

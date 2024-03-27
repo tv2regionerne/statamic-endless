@@ -41,16 +41,16 @@ class Endless extends Component
     public function render()
     {
         return <<<'HTML'
-        @php [$html, $params] = $this->outputMain(); @endphp
+        @php [$html, $data] = $this->outputMain(); @endphp
         <div x-data='{
-            ...@json($params),
+            ...@json($data),
             loading: false,
             trigger() {
                 this.loading = true;
                 this.$wire.trigger()
-                    .then(([ html, params ]) => {
+                    .then(([ html, data ]) => {
                         this.loading = false;
-                        Object.assign(this, params);
+                        Object.assign(this, data);
                         const fragment = document.createRange().createContextualFragment(html);
                         this.$refs.append?.appendChild(fragment.cloneNode(true));
                         this.$refs.prepend?.insertBefore(fragment.cloneNode(true), this.$refs.prepend.firstChild);

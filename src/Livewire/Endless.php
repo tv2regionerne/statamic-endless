@@ -35,12 +35,7 @@ class Endless extends Component
     {
         $this->nextPage();
 
-        [$html, $params] = $this->outputLoop();
-
-        return [
-            'html' => $html,
-            'params' => $params,
-        ];
+        return $this->outputLoop();
     }
 
     public function render()
@@ -53,7 +48,7 @@ class Endless extends Component
             trigger() {
                 this.loading = true;
                 this.$wire.trigger()
-                    .then(({ html, params }) => {
+                    .then(([ html, params ]) => {
                         this.loading = false;
                         Object.assign(this, params);
                         const divFragment = document.createRange().createContextualFragment(html);

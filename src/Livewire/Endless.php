@@ -39,7 +39,7 @@ class Endless extends Component
 
         return [
             'html' => $html,
-            'paginate' => $this->getPaginateFromParams($params),
+            'params' => $params,
         ];
     }
 
@@ -48,14 +48,14 @@ class Endless extends Component
         return <<<'HTML'
         @php [$html, $params] = $this->outputMain(); @endphp
         <div x-data='{
+            ...@json($params),
             loading: false,
-            paginate: @json($this->getPaginateFromParams($params)),
             trigger() {
                 this.loading = true;
                 this.$wire.trigger()
-                    .then(({ html, paginate }) => {
+                    .then(({ html, params }) => {
                         this.loading = false;
-                        this.paginate = paginate;
+                        Object.assign(this, params);
                         const divFragment = document.createRange().createContextualFragment(html);
                         this.$refs.append?.appendChild(divFragment.cloneNode(true));
                         if (this.$refs.prepend) {
@@ -69,25 +69,25 @@ class Endless extends Component
 
     protected function outputMain()
     {
-        $params = $this->viewParams();
+        $params = $this->antlersParams();
 
         return [
             (string) Antlers::parse($this->config['main'], $params),
-            $params,
+            $this->alpineParams($params),
         ];
     }
 
     protected function outputLoop()
     {
-        $params = $this->viewParams();
+        $params = $this->antlersParams();
 
         return [
             (string) Antlers::parse($this->config['loop'], $params),
-            $params,
+            $this->alpineParams($params),
         ];
     }
 
-    protected function viewParams()
+    protected function antlersParams()
     {
         $tag = app(Loader::class)
             ->load($this->config['tag'], [
@@ -103,18 +103,19 @@ class Endless extends Component
         ];
     }
 
-    protected function getPaginateFromParams($params)
+    protected function alpineParams($params)
     {
-        if (! isset($params['paginate'])) {
-            return false;
+        $paginate = $params['paginate'] ?? null;
+
+        if ($paginate) {
+            $paginate = collect($paginate)
+                ->only(['total_items', 'items_per_page', 'total_pages', 'current_page'])
+                ->merge(['has_more_pages' => $paginate['total_pages'] > $paginate['current_page']])
+                ->all();
         }
 
-        $paginate = $params['paginate'];
-
-        $paginate['has_more_pages'] = $paginate['total_pages'] > $paginate['current_page'];
-
-        return collect($paginate)
-            ->except(['auto_links'])
-            ->all();
+        return [
+            'paginate' => $paginate,
+        ];
     }
 }

@@ -51,11 +51,9 @@ class Endless extends Component
                     .then(([ html, params ]) => {
                         this.loading = false;
                         Object.assign(this, params);
-                        const divFragment = document.createRange().createContextualFragment(html);
-                        this.$refs.append?.appendChild(divFragment.cloneNode(true));
-                        if (this.$refs.prepend) {
-                            this.$refs.prepend.insertBefore(divFragment, this.$refs.prepend.firstChild);
-                        }
+                        const fragment = document.createRange().createContextualFragment(html);
+                        this.$refs.append?.appendChild(fragment.cloneNode(true));
+                        this.$refs.prepend?.insertBefore(fragment.cloneNode(true), this.$refs.prepend.firstChild);
                     });
             },
         }'>{!! $html !!}</div>

@@ -47,7 +47,7 @@ class Endless extends Component
             loading: false,
             trigger() {
                 this.loading = true;
-                this.$wire.trigger()
+                return this.$wire.trigger()
                     .then(([ html, data ]) => {
                         this.loading = false;
                         Object.assign(this, data);

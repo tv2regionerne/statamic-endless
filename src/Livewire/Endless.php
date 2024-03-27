@@ -62,36 +62,29 @@ class Endless extends Component
 
     protected function outputMain()
     {
-        $params = $this->antlersParams();
+        $antlersData = $this->antlersData();
 
         return [
-            (string) Antlers::parse($this->config['main'], $params),
-            $this->alpineParams($params),
+            (string) Antlers::parse($this->config['main'], $antlersData),
+            $this->alpineData($antlersData),
         ];
     }
 
     protected function outputLoop()
     {
-        $params = $this->antlersParams();
+        $antlersData = $this->antlersData();
 
         return [
-            (string) Antlers::parse($this->config['loop'], $params),
-            $this->alpineParams($params),
+            (string) Antlers::parse($this->config['loop'], $antlersData),
+            $this->alpineData($antlersData),
         ];
     }
 
-    protected function antlersParams()
+    protected function antlersData()
     {
-        $params = $this->config['params'];
-
-        if ($limit = $params['limit'] ?? null) {
-            $params['paginate'] = $limit;
-            unset($params['limit']);
-        }
-
         $tag = app(Loader::class)
             ->load($this->config['tag'], [
-                'params' => $params,
+                'params' => $this->config['params'],
                 'parser' => null,
                 'content' => null,
                 'context' => $this->config['context'],
@@ -103,19 +96,20 @@ class Endless extends Component
         ];
     }
 
-    protected function alpineParams($params)
+    protected function alpineData($antlersData)
     {
-        $paginate = $params['paginate'] ?? null;
+        $data = [];
 
-        if ($paginate) {
-            $paginate = collect($paginate)
+        $params = $this->config['params'];
+
+        if (isset($params['paginate']) && isset($antlersData['paginate'])) {
+            $paginate = $antlersData['paginate'];
+            $data['paginate'] = collect($paginate)
                 ->only(['total_items', 'items_per_page', 'total_pages', 'current_page'])
                 ->merge(['has_more_pages' => $paginate['total_pages'] > $paginate['current_page']])
                 ->all();
         }
 
-        return [
-            'paginate' => $paginate,
-        ];
+        return $data;
     }
 }

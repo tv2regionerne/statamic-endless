@@ -35,12 +35,7 @@ class Endless extends Component
     {
         $this->nextPage();
 
-        [$html, $params] = $this->outputLoop();
-
-        return [
-            'html' => $html,
-            'paginate' => $this->getPaginateFromParams($params),
-        ];
+        return $this->outputLoop();
     }
 
     public function render()
@@ -48,19 +43,17 @@ class Endless extends Component
         return <<<'HTML'
         @php [$html, $params] = $this->outputMain(); @endphp
         <div x-data='{
+            ...@json($params),
             loading: false,
-            paginate: @json($this->getPaginateFromParams($params)),
             trigger() {
                 this.loading = true;
                 this.$wire.trigger()
-                    .then(({ html, paginate }) => {
+                    .then(([ html, params ]) => {
                         this.loading = false;
-                        this.paginate = paginate;
-                        const divFragment = document.createRange().createContextualFragment(html);
-                        this.$refs.append?.appendChild(divFragment.cloneNode(true));
-                        if (this.$refs.prepend) {
-                            this.$refs.prepend.insertBefore(divFragment, this.$refs.prepend.firstChild);
-                        }
+                        Object.assign(this, params);
+                        const fragment = document.createRange().createContextualFragment(html);
+                        this.$refs.append?.appendChild(fragment.cloneNode(true));
+                        this.$refs.prepend?.insertBefore(fragment.cloneNode(true), this.$refs.prepend.firstChild);
                     });
             },
         }'>{!! $html !!}</div>
@@ -69,25 +62,25 @@ class Endless extends Component
 
     protected function outputMain()
     {
-        $params = $this->viewParams();
+        $antlersData = $this->antlersData();
 
         return [
-            (string) Antlers::parse($this->config['main'], $params),
-            $params,
+            (string) Antlers::parse($this->config['main'], $antlersData),
+            $this->alpineData($antlersData),
         ];
     }
 
     protected function outputLoop()
     {
-        $params = $this->viewParams();
+        $antlersData = $this->antlersData();
 
         return [
-            (string) Antlers::parse($this->config['loop'], $params),
-            $params,
+            (string) Antlers::parse($this->config['loop'], $antlersData),
+            $this->alpineData($antlersData),
         ];
     }
 
-    protected function viewParams()
+    protected function antlersData()
     {
         $tag = app(Loader::class)
             ->load($this->config['tag'], [
@@ -103,18 +96,20 @@ class Endless extends Component
         ];
     }
 
-    protected function getPaginateFromParams($params)
+    protected function alpineData($antlersData)
     {
-        if (! isset($params['paginate'])) {
-            return false;
+        $data = [];
+
+        $params = $this->config['params'];
+
+        if (isset($params['paginate']) && isset($antlersData['paginate'])) {
+            $paginate = $antlersData['paginate'];
+            $data['paginate'] = collect($paginate)
+                ->only(['total_items', 'items_per_page', 'total_pages', 'current_page'])
+                ->merge(['has_more_pages' => $paginate['total_pages'] > $paginate['current_page']])
+                ->all();
         }
 
-        $paginate = $params['paginate'];
-
-        $paginate['has_more_pages'] = $paginate['total_pages'] > $paginate['current_page'];
-
-        return collect($paginate)
-            ->except(['auto_links'])
-            ->all();
+        return $data;
     }
 }

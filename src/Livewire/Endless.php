@@ -82,9 +82,16 @@ class Endless extends Component
 
     protected function antlersParams()
     {
+        $params = $this->config['params'];
+
+        if ($limit = $params['limit'] ?? null) {
+            $params['paginate'] = $limit;
+            unset($params['limit']);
+        }
+
         $tag = app(Loader::class)
             ->load($this->config['tag'], [
-                'params' => $this->config['params'],
+                'params' => $params,
                 'parser' => null,
                 'content' => null,
                 'context' => $this->config['context'],

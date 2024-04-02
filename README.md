@@ -25,6 +25,34 @@ Make sure Livewire v3 is installed, then use the `collection:endless` tag:
 {{ /collection:endless }}
 ```
 
+Example with intersectors:
+```antlers
+{{ collection:endless as="posts" from="blog" paginate="5" }}
+    <div x-ref="append">
+        {{ posts }}
+            {{ partial:blog/post }}
+        {{ /posts }}
+    </div>
+    <div
+    x-data="{
+        intersecting: false,
+        init() {
+            $watch('intersecting', () => this.check());
+        },
+        check() {
+            if (this.intersecting && paginate.has_more_pages) {
+                trigger().then(() => this.check());
+            }
+        },
+    }"
+    x-show="!loading && paginate.has_more_pages"
+    x-intersect:enter="intersecting = true"
+    x-intersect:leave="intersecting = false">
+</div>
+{{ /collection:endless }}
+```
+
+
 You must enable pagination.
 
 The content will be wrapped in a Livewire/Alpine component:

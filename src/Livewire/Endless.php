@@ -92,7 +92,7 @@ class Endless extends Component
 
         return [
             ...$this->config['context'],
-            ...$tag->index(),
+            ...$tag->index() ?? [],
         ];
     }
 

@@ -17,7 +17,7 @@
         }
     },
     "require": {
-        "statamic/cms": "^4.48",
+        "statamic/cms": "^4.48 || ^5.0",
         "livewire/livewire": "^3.4"
     },
     "config": {

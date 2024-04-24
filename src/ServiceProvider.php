@@ -8,6 +8,7 @@ use Statamic\Providers\AddonServiceProvider;
 use Statamic\Tags\Collection\Collection;
 use Statamic\View\Antlers\Language\Nodes\AntlersNode;
 use Statamic\View\Antlers\Language\Parser\DocumentParser;
+use Tv2regionerne\StatamicCuratedCollection\Tags\StatamicCuratedCollection;
 use Tv2regionerne\StatamicEndless\Livewire\Endless;
 
 class ServiceProvider extends AddonServiceProvider
@@ -28,7 +29,18 @@ class ServiceProvider extends AddonServiceProvider
 
     public function bootTags()
     {
-        Collection::macro('endless', function () {
+        Collection::macro('endless', $this->makeTagMacro('collection'));
+
+        if (class_exists(StatamicCuratedCollection::class)) {
+            StatamicCuratedCollection::macro('endless', $this->makeTagMacro('curated_collection'));
+        }
+
+        return $this;
+    }
+
+    protected function makeTagMacro($tag)
+    {
+        return function () use ($tag) {
             $params = $this->params;
             $context = $this->context
                 ->only(explode('|', $params->get('context')));
@@ -42,8 +54,8 @@ class ServiceProvider extends AddonServiceProvider
 
             $key = 'statamic-endless.'.$hash;
 
-            Cache::rememberForever($key, function () use ($params, $context) {
-                $as = $params->get('as', $this->defaultAsKey);
+            Cache::rememberForever($key, function () use ($tag, $params, $context) {
+                $as = $params->get('as', $this->defaultAsKey ?? 'results');
 
                 $parser = tap(app(DocumentParser::class))->parse($this->content);
                 $loop = collect($parser->getNodes())
@@ -58,7 +70,7 @@ class ServiceProvider extends AddonServiceProvider
                 }
 
                 return [
-                    'tag' => 'collection',
+                    'tag' => $tag,
                     'main' => $this->content,
                     'loop' => $loop->documentText(),
                     'params' => $params->toArray(),
@@ -67,7 +79,7 @@ class ServiceProvider extends AddonServiceProvider
             });
 
             return Livewire::mount('statamic-endless', ['hash' => $hash]);
-        });
+        };
 
         return $this;
     }

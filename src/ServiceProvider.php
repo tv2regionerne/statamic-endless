@@ -3,6 +3,7 @@
 namespace Tv2regionerne\StatamicEndless;
 
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Tags\Collection\Collection;
@@ -29,18 +30,7 @@ class ServiceProvider extends AddonServiceProvider
 
     public function bootTags()
     {
-        Collection::macro('endless', $this->makeTagMacro('collection'));
-
-        if (class_exists(StatamicCuratedCollection::class)) {
-            StatamicCuratedCollection::macro('endless', $this->makeTagMacro('curated_collection'));
-        }
-
-        return $this;
-    }
-
-    protected function makeTagMacro($tag)
-    {
-        return function () use ($tag) {
+        $macro = function () {
             $params = $this->params;
             $context = $this->context
                 ->only(explode('|', $params->get('context')));
@@ -54,7 +44,7 @@ class ServiceProvider extends AddonServiceProvider
 
             $key = 'statamic-endless.'.$hash;
 
-            Cache::rememberForever($key, function () use ($tag, $params, $context) {
+            Cache::rememberForever($key, function () use ($params, $context) {
                 $as = $params->get('as', $this->defaultAsKey ?? 'results');
 
                 $parser = tap(app(DocumentParser::class))->parse($this->content);
@@ -70,7 +60,7 @@ class ServiceProvider extends AddonServiceProvider
                 }
 
                 return [
-                    'tag' => $tag,
+                    'tag' => Str::before($this->tag, ':'),
                     'main' => $this->content,
                     'loop' => $loop->documentText(),
                     'params' => $params->toArray(),
@@ -80,6 +70,11 @@ class ServiceProvider extends AddonServiceProvider
 
             return Livewire::mount('statamic-endless', ['hash' => $hash]);
         };
+
+        Collection::macro('endless', $macro);
+        if (class_exists(StatamicCuratedCollection::class)) {
+            StatamicCuratedCollection::macro('endless', $macro);
+        }
 
         return $this;
     }

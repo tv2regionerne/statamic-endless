@@ -9,6 +9,7 @@ use Livewire\Component;
 use Livewire\WithoutUrlPagination;
 use Livewire\WithPagination;
 use Statamic\Facades\Antlers;
+use Statamic\StaticCaching\Replacers\NoCacheReplacer;
 use Statamic\Tags\Loader;
 
 class Endless extends Component
@@ -75,7 +76,7 @@ class Endless extends Component
         $antlersData = $this->antlersData();
 
         return [
-            (string) Antlers::parse($this->config['loop'], $antlersData),
+            app()->make(NoCacheReplacer::class)->replace( (string) Antlers::parse($this->config['loop'], $antlersData)),
             $this->alpineData($antlersData),
         ];
     }

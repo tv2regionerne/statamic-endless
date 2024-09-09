@@ -21,6 +21,12 @@ class Endless extends Component
 
     protected $config;
 
+    public function boot(): void
+    {
+        // Fix issue with cache headers
+        $this->enableBackButtonCache();
+    }
+
     public function mount()
     {
         $this->config = Cache::get('statamic-endless.'.$this->hash);

@@ -49,10 +49,15 @@ class ServiceProvider extends AddonServiceProvider
 
                 $parser = tap(app(DocumentParser::class))->parse($this->content);
                 $loop = collect($parser->getNodes())
+                    ->filter(fn ($node) => $node instanceof AntlersNode)
                     ->first(function ($node) use ($as) {
-                        return $node instanceof AntlersNode
-                            && $node->name != null
-                            && $node->name->name == $as;
+                        return (
+                            $node->name?->name == $as
+                        ) || (
+                            $node->isTagNode &&
+                            $node->name?->name == 'foreach' &&
+                            $node->name?->methodPart == $as
+                        );
                     });
 
                 if (! $loop) {

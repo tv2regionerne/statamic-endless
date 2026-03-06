@@ -72,7 +72,7 @@ class Endless extends Component
         $antlersData = $this->antlersData();
 
         return [
-            (string) Antlers::parse($this->config['main'], $antlersData),
+            (string) Antlers::parse($this->config['main'], $antlersData, true),
             $this->alpineData($antlersData),
         ];
     }
@@ -82,7 +82,7 @@ class Endless extends Component
         $antlersData = $this->antlersData();
 
         return [
-            app()->make(NoCacheReplacer::class)->replace( (string) Antlers::parse($this->config['loop'], $antlersData)),
+            app()->make(NoCacheReplacer::class)->replace( (string) Antlers::parse($this->config['loop'], $antlersData, true)),
             $this->alpineData($antlersData),
         ];
     }

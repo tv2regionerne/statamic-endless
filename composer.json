@@ -1,6 +1,5 @@
 {
     "name": "tv2regionerne/statamic-endless",
-    "version": "2.0.0",
     "autoload": {
         "psr-4": {
             "Tv2regionerne\\StatamicEndless\\": "src"

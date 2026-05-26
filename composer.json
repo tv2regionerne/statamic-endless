@@ -5,6 +5,11 @@
             "Tv2regionerne\\StatamicEndless\\": "src"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tv2regionerne\\StatamicEndless\\Tests\\": "tests"
+        }
+    },
     "extra": {
         "statamic": {
             "name": "Statamic Endless",
@@ -20,8 +25,18 @@
         "statamic/cms": "^5.73.12",
         "livewire/livewire": "^3.4"
     },
+    "require-dev": {
+        "mockery/mockery": "^1.6",
+        "orchestra/testbench": "^8.36 || ^9.15",
+        "pestphp/pest": "^2.24 || ^3.0",
+        "pestphp/pest-plugin-laravel": "^2.2 || ^3.0"
+    },
+    "scripts": {
+        "test": "pest"
+    },
     "config": {
         "allow-plugins": {
+            "pestphp/pest-plugin": true,
             "pixelfear/composer-dist-plugin": true
         }
     }

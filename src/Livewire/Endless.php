@@ -19,6 +19,12 @@ class Endless extends Component
     #[Locked]
     public $hash;
 
+    #[Locked]
+    public array $initialDeduplicateIds = [];
+
+    #[Locked]
+    public bool $hasCapturedInitialDeduplicateIds = false;
+
     protected $config;
 
     public function boot(): void
@@ -90,6 +96,9 @@ class Endless extends Component
     protected function antlersData()
     {
         $params = $this->config['params'];
+
+        $this->prepareDeduplicateState($params);
+
         $as = $params['as'] ?? 'entries';
         $isPaginated = isset($params['paginate']);
         $perPage = null;
@@ -137,6 +146,29 @@ class Endless extends Component
         }
 
         return $result;
+    }
+
+    protected function prepareDeduplicateState(array $params): void
+    {
+        if (! ($params['deduplicate'] ?? false) || ! app()->bound('deduplicate')) {
+            return;
+        }
+
+        if (! $this->hasCapturedInitialDeduplicateIds) {
+            $this->initialDeduplicateIds = app('deduplicate')->fetch();
+            $this->hasCapturedInitialDeduplicateIds = true;
+        }
+
+        $missingIds = array_values(array_diff(
+            $this->initialDeduplicateIds,
+            app('deduplicate')->fetch(),
+        ));
+
+        if ($missingIds === []) {
+            return;
+        }
+
+        app('deduplicate')->merge($missingIds);
     }
 
     protected function alpineData($antlersData)

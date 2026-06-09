@@ -72,6 +72,31 @@ function mockLoader(array $items, ?array $capturedParams = null): void
     app()->instance(Loader::class, $loaderMock);
 }
 
+function bindDeduplicate(array $ids = []): object
+{
+    $deduplicate = new class($ids) {
+        public function __construct(public array $ids = [])
+        {
+        }
+
+        public function fetch(): array
+        {
+            return $this->ids;
+        }
+
+        public function merge(array $ids): self
+        {
+            $this->ids = array_merge($this->ids, $ids);
+
+            return $this;
+        }
+    };
+
+    app()->instance('deduplicate', $deduplicate);
+
+    return $deduplicate;
+}
+
 it('passes params through unchanged when paginate is not set', function () {
     $forwardedParams = [];
 
@@ -193,6 +218,103 @@ it('calculates correct offset for page 3', function () {
     expect($forwardedParams)
         ->toHaveKey('limit', 6)
         ->toHaveKey('offset', 10); // (3 - 1) * 5
+});
+
+it('captures existing deduplicate ids before the first paginated query', function () {
+    $existingIds = ['first-teaser-1', 'first-teaser-2'];
+    $idsAtLoad = [];
+
+    bindDeduplicate($existingIds);
+
+    $tagMock = Mockery::mock();
+    $tagMock->shouldReceive('index')->once()->andReturn(['entries' => []]);
+
+    $loaderMock = Mockery::mock(Loader::class);
+    $loaderMock
+        ->shouldReceive('load')
+        ->once()
+        ->withArgs(function (string $tagName, array $props) use (&$idsAtLoad) {
+            $idsAtLoad = app('deduplicate')->fetch();
+
+            return true;
+        })
+        ->andReturn($tagMock);
+
+    app()->instance(Loader::class, $loaderMock);
+
+    $config = makeConfig(['paginate' => '2', 'deduplicate' => true, 'from' => 'articles']);
+    $component = makeEndless($config, page: 1);
+    $component->exposeAntlersData();
+
+    expect($component->hasCapturedInitialDeduplicateIds)->toBeTrue()
+        ->and($component->initialDeduplicateIds)->toBe($existingIds)
+        ->and($idsAtLoad)->toBe($existingIds);
+});
+
+it('replays captured deduplicate ids before livewire pagination requests', function () {
+    $existingIds = ['first-teaser-1', 'first-teaser-2'];
+    $forwardedParams = [];
+    $idsAtLoad = [];
+
+    bindDeduplicate();
+
+    $tagMock = Mockery::mock();
+    $tagMock->shouldReceive('index')->once()->andReturn(['entries' => []]);
+
+    $loaderMock = Mockery::mock(Loader::class);
+    $loaderMock
+        ->shouldReceive('load')
+        ->once()
+        ->withArgs(function (string $tagName, array $props) use (&$forwardedParams, &$idsAtLoad) {
+            $forwardedParams = $props['params'];
+            $idsAtLoad = app('deduplicate')->fetch();
+
+            return true;
+        })
+        ->andReturn($tagMock);
+
+    app()->instance(Loader::class, $loaderMock);
+
+    $config = makeConfig(['paginate' => '2', 'deduplicate' => true, 'from' => 'articles']);
+    $component = makeEndless($config, page: 2);
+    $component->initialDeduplicateIds = $existingIds;
+    $component->hasCapturedInitialDeduplicateIds = true;
+    $component->exposeAntlersData();
+
+    expect($idsAtLoad)->toBe($existingIds)
+        ->and($forwardedParams)
+        ->toHaveKey('limit', 3)
+        ->toHaveKey('offset', 2);
+});
+
+it('does not replay captured deduplicate ids when deduplicate is disabled', function () {
+    $idsAtLoad = [];
+
+    bindDeduplicate();
+
+    $tagMock = Mockery::mock();
+    $tagMock->shouldReceive('index')->once()->andReturn(['entries' => []]);
+
+    $loaderMock = Mockery::mock(Loader::class);
+    $loaderMock
+        ->shouldReceive('load')
+        ->once()
+        ->withArgs(function (string $tagName, array $props) use (&$idsAtLoad) {
+            $idsAtLoad = app('deduplicate')->fetch();
+
+            return true;
+        })
+        ->andReturn($tagMock);
+
+    app()->instance(Loader::class, $loaderMock);
+
+    $config = makeConfig(['paginate' => '2', 'deduplicate' => false, 'from' => 'articles']);
+    $component = makeEndless($config, page: 2);
+    $component->initialDeduplicateIds = ['first-teaser-1', 'first-teaser-2'];
+    $component->hasCapturedInitialDeduplicateIds = true;
+    $component->exposeAntlersData();
+
+    expect($idsAtLoad)->toBe([]);
 });
 
 it('sets has_more_pages true and slices items when tag returns more than perPage items', function () {
